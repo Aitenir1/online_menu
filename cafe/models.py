@@ -33,13 +33,6 @@ class Table(models.Model):
         return f"Table #{self.id}"
 
 
-class Cart(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    dishes = models.ManyToManyField('Dish')
-
-    def __str__(self):
-        return f"{', '.join([dish.name_en for dish in self.dishes.all()])}"
-
 class Order(models.Model):
 
     STATUS_CHOICES = (
@@ -54,3 +47,20 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.cart} {sum([dish.price for dish in self.cart.dishes.all()])}"
+
+
+class CartItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    dish = models.ForeignKey(Dish, on_delete=models.DO_NOTHING)
+    cart = models.ForeignKey('Cart', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.cart} | {self.dish.name_en}"
+
+class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    table = models.ForeignKey(Table, on_delete=models.DO_NOTHING, default=1)
+
+    def __str__(self):
+        return ", ".join([dish.name_en for dish in Dish.objects.filter(cartitem__cart=self)])
