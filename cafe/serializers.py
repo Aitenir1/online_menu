@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from cafe.models import Dish, Cart, Category, Table, CartItem
 
-
+# This commit it
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Category
