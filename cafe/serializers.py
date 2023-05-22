@@ -56,7 +56,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 order=order,
                 quantity=quantity
             )
-            print(f"{dish.price}: {quantity}")
+
             total_sum += dish.price * quantity
 
         order.total_price = total_sum

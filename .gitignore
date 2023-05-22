@@ -1,2 +1,3 @@
 .venv/
 /MotionWeb
+/cafe/qr_generator.py

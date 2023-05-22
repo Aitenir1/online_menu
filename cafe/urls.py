@@ -6,12 +6,6 @@ from django.contrib.auth.decorators import login_required
 
 router = routers.DefaultRouter()
 router.register(r'dishes', DishViewSet, basename='dish')
-# router.register(r'carts', CartViewSet)
-# router.register(r'categories', CategoryViewSet)
-# router.register(r'tables', TableViewSet)
-# router.register(r'cart-item', CartItemViewSet)
-# router.register(r'orders', OrderViewSet)
-# router.register(r'order-items', OrderItemsViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

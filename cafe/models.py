@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 from django.utils import timezone
 
-from cafe.generate_cheque import Cheque
+from cafe.Cheque import Cheque
 
 class Table(models.Model):
     id = models.AutoField(primary_key=True)
