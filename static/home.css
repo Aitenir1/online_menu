@@ -1,0 +1,69 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.exemplar_info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 500px;
+}
+
+span {
+    /*margin-bottom: .1em;*/
+}
+
+.username_actions {
+    font-size: .8em;
+    color: grey;
+}
+
+ a {
+    color: grey;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.title {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #727ab5
+}
+
+.status {
+    font-size: 1em;
+    text-decoration: underline;
+}
+
+.available {
+    color: #3CB371;
+    text-decoration-color: #3CB371;
+}
+
+.borrowed {
+    color: #DC143C;
+    text-decoration-color: #DC143C;
+}
+
+.code, .author {
+    font-size: .9em;
+    color: #474747;
+}
+
+.borrow {
+    margin: 1em 0;
+    padding: 1em;
+    border-radius: 1em;
+    background-color: #c1c1c1;
+    color: #474747;
+}
+
+.active {
+    color: #2D4262;
+    background-color: #D09683;
+}
+
+th {
+    text-align: start;
+    width: 100px;
+}

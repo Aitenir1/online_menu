@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from cafe.models import Dish, Cart, Category, Table, CartItem
+from cafe.models import Dish, Category, Table, Order, OrderItem
 
-# fadsfkajdsplfkajsdfkjas
+
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Category
@@ -15,50 +15,51 @@ class TableSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class DishSerializer(serializers.HyperlinkedModelSerializer):
-    # carts = CartSerializer(many=True, read_only=True)
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    category_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Dish
-        fields = ['id', 'name_en', 'name_kg', 'name_ru', 'description_en', 'description_kg', 'description_ru', 'price',
-                  'gram', 'category', 'image']
+        fields = ['id', 'name_en', 'name_kg', 'name_ru',
+                  'description_en', 'description_kg', 'description_ru',
+                  'price', 'gram', 'category_name', 'image']
+
+    @staticmethod
+    def get_category_name(obj):
+        return obj.category.name
 
 
-class CartItemSerializer(serializers.ModelSerializer):
-    # dish = DishSerializer(many=True)
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['dish', 'quantity']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    time_created = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
 
     class Meta:
-        model = CartItem
-        fields = '__all__'
+        model = Order
+        fields = ['id', 'table', 'time_created', 'status', 'payment', 'is_takeaway', 'total_price', 'items']
 
+    def create(self, validated_data: dict):
+        order_items = validated_data.pop('items')
+        order = Order.objects.create(**validated_data)
 
-class CartSerializer(serializers.ModelSerializer):
-    # dishes = DishSerializer(many=True, read_only=True)
-    # dishes = serializers.PrimaryKeyRelatedField(queryset=Dish.objects.all(), many=True)
-    # table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all(), read_only=False)
-    # items = CartItemSerializer(many=True)
+        total_sum = 0
+        for order_item in order_items:
+            dish = order_item['dish']
+            quantity = order_item['quantity']
 
-    def to_representation(self, instance):
-        # self.fields['table_id'] = serializers.PrimaryKeyRelatedField(queryset=Dish.objects.all())
-        # self.fields['table_id'] =
+            OrderItem.objects.create(
+                dish=dish,
+                order=order,
+                quantity=quantity
+            )
+            print(f"{dish.price}: {quantity}")
+            total_sum += dish.price * quantity
 
-        return super(CartSerializer, self).to_representation(instance)
+        order.total_price = total_sum
+        order.save()
 
-    def get_items(self, obj):
-        dishes = Dish.objects.filter(cartitem__cart=self)
-        serializer = DishSerializer(dishes, many=True)
-        return serializer.data
-
-    # def create(self, validated_date):
-    #     table = validated_date.pop('table')
-    #     cart = Cart.objects.create(**validated_date)
-    #
-    #     # table.objects
-    #
-    #     return cart
-
-    class Meta:
-        model = Cart
-        # fields = ['id', 'dishes']
-        fields = ['id', 'table']
-        # extra_kwargs = {'dishes': {'required': False}}
+        return order
