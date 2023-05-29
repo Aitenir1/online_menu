@@ -1,8 +1,9 @@
 from django.db import models
 import uuid
-from django.utils import timezone
 
 from cafe.Cheque import Cheque
+
+from django.utils import timezone
 
 class Table(models.Model):
     id = models.AutoField(primary_key=True)
@@ -64,27 +65,32 @@ class Order(models.Model):
         return f"This order | {self.total_price}"
 
     def generate_cheque(self):
-        # Create a PDF instance with smaller page size (e.g., 80mm x 150mm)
-        cheque_pdf = Cheque(format=(80, 150))
+        cheque_pdf = Cheque(
+            date=self.time_created.strftime("%d.%m.%y %H:%M:%S"),
+            table=self.table,
+            format=(80, 100)
+        )
 
-        # Set document properties
-        cheque_pdf.set_title("Cheque")
+        cheque_pdf.add_font('DejaVu', '', 'fonts/DejaVuSansCondensed.ttf', uni=True)
+        cheque_pdf.set_font("DejaVu", '', 8)
+
         cheque_pdf.set_auto_page_break(auto=True, margin=5)
-
-        # Add a page
         cheque_pdf.add_page()
 
-        # Set font and font size
-        cheque_pdf.set_font("Arial", "", 10)
+        cheque_pdf.cell(0, 5, 'Наименования товаров:', 0, 1)
 
-        # Add content to the cheque
-        cheque_pdf.cell(0, 5, f"Date : {self.time_created.strftime('%d-%m-%y')}", 0, 1)
-        cheque_pdf.cell(0, 5, f"Time : {self.time_created.strftime('%i-%h')}", 0, 1)
-        cheque_pdf.cell(0, 5, f"Table: {self.table}", 0, 1)
-        cheque_pdf.cell(0, 5, f"Total Amount: ${self.total_price}", 0, 1)
+        for order_item in self.items.all():
+            cheque_pdf.cell(40, 4, order_item.dish.name_ru, 0, 0)
+            cheque_pdf.cell(10, 4, f"{order_item.quantity}*{order_item.dish.price}", 0, 0)
+            cheque_pdf.cell(10, 4, f"={order_item.quantity*order_item.dish.price}", 0, 1)
 
-        # Save the PDF
-        cheque_pdf.output("media/cheque.pdf")
+        cheque_pdf.cell(0, 5, "", 0, 1)
+        cheque_pdf.cell(0, 4, f"Наличными", 0, 1, "")
+        cheque_pdf.set_font("DejaVu", '', 10)
+        cheque_pdf.cell(0, 4, f"Общая сумма: {self.total_price}", 0, 1, "")
+
+        return cheque_pdf
+        # cheque_pdf.output(f"cheque_{str(self.id)[:5]}.pdf")
 
     class Meta:
         ordering = ['status', 'time_created']
