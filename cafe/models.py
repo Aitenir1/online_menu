@@ -28,6 +28,14 @@ class Dish(models.Model):
         return f"{self.name_en} | {self.price}"
 
 
+class Additive(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    name = models.CharField(max_length=200)
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.dish.name_en + self.name
+
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=50)
