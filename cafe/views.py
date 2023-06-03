@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.utils.dateparse import parse_date
 
 from rest_framework import viewsets, generics
+from rest_framework.permissions import IsAuthenticated
 
 from cafe.models import Dish, Order
 from cafe.serializers import DishSerializer, OrderSerializer
@@ -26,6 +27,11 @@ class MyLoginView(LoginView):
 
     def get_success_url(self):
         return reverse_lazy('home')
+
+class OrderListApiView(generics.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
 
 
 class OrderListView(ListView):
