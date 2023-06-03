@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import F, Q
 import uuid
 
 from cafe.Cheque import Cheque
@@ -30,11 +31,15 @@ class Dish(models.Model):
 
 class Additive(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    name = models.CharField(max_length=200)
-    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    name_en = models.CharField(max_length=50)
+    name_ru = models.CharField(max_length=50)
+    name_kg = models.CharField(max_length=50)
+    price = models.FloatField(default=0)
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='available_additives')
 
     def __str__(self):
-        return self.dish.name_en + self.name
+        return f"{self.dish.name_en} + {self.name_en}"
+
 
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -91,6 +96,9 @@ class Order(models.Model):
             cheque_pdf.cell(40, 4, order_item.dish.name_ru, 0, 0)
             cheque_pdf.cell(10, 4, f"{order_item.quantity}*{order_item.dish.price}", 0, 0)
             cheque_pdf.cell(10, 4, f"={order_item.quantity*order_item.dish.price}", 0, 1)
+            for additive in order_item.additives.all():
+                cheque_pdf.cell(50, 4, additive.name_ru, 0, 0)
+                cheque_pdf.cell(10, 4, f"={additive.price}", 0, 1)
 
         cheque_pdf.cell(0, 5, "", 0, 1)
         cheque_pdf.cell(0, 4, f"Наличными", 0, 1, "")
@@ -98,7 +106,6 @@ class Order(models.Model):
         cheque_pdf.cell(0, 4, f"Общая сумма: {self.total_price}", 0, 1, "")
 
         return cheque_pdf
-        # cheque_pdf.output(f"cheque_{str(self.id)[:5]}.pdf")
 
     class Meta:
         ordering = ['status', 'time_created']
@@ -108,3 +115,4 @@ class OrderItem(models.Model):
     dish = models.ForeignKey('Dish', on_delete=models.CASCADE)
     order = models.ForeignKey('Order', related_name='items', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    additives = models.ManyToManyField(Additive, blank=True)

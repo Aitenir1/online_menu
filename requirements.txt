@@ -1,11 +1,14 @@
 asgiref==3.6.0
+defusedxml==0.7.1
 Django==4.2.1
 django-cors-headers==4.0.0
 djangorestframework==3.14.0
+fonttools==4.39.4
+fpdf==1.7.2
 Pillow==9.5.0
 psycopg2-binary==2.9.6
+pypng==0.20220715.0
 pytz==2023.3
+qrcode==7.4.2
 sqlparse==0.4.4
-qrcode~=7.4.2
-fpdf~=1.7.2
-
+typing_extensions==4.5.0

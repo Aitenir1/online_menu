@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cafe.models import Dish, Category, Table, Order, OrderItem
+from cafe.models import Dish, Category, Table, Order, OrderItem, Additive
 
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
@@ -14,14 +14,21 @@ class TableSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'url']
 
 
+class AdditiveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Additive
+        fields = '__all__'
+
+
 class DishSerializer(serializers.HyperlinkedModelSerializer):
     category_name = serializers.SerializerMethodField()
+    available_additives = AdditiveSerializer(many=True)
 
     class Meta:
         model = Dish
         fields = ['id', 'name_en', 'name_kg', 'name_ru',
                   'description_en', 'description_kg', 'description_ru',
-                  'price', 'gram', 'category_name', 'image']
+                  'price', 'gram', 'category_name', 'image', 'available_additives']
 
     @staticmethod
     def get_category_name(obj):
@@ -31,7 +38,7 @@ class DishSerializer(serializers.HyperlinkedModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ['dish', 'quantity']
+        fields = ['dish', 'quantity', 'additives']
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -43,23 +50,42 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'table', 'time_created', 'status', 'payment', 'is_takeaway', 'total_price', 'items']
 
     def create(self, validated_data: dict):
-        order_items = validated_data.pop('items')
-        order = Order.objects.create(**validated_data)
+        try:
+            order_items = validated_data.pop('items')
+            order = Order.objects.create(**validated_data)
 
-        total_sum = 0
-        for order_item in order_items:
-            dish = order_item['dish']
-            quantity = order_item['quantity']
+            total_sum = 0
+            for order_item in order_items:
 
-            OrderItem.objects.create(
-                dish=dish,
-                order=order,
-                quantity=quantity
-            )
+                dish = order_item['dish']
+                quantity = order_item['quantity']
+                additives = order_item['additives']
 
-            total_sum += dish.price * quantity
+                for additive in additives:
+                    total_sum += additive.price
+                    if additive.dish != dish:
+                        raise serializers.ValidationError(f'{dish.name_en} does not have {additive.name_en} additive')
 
-        order.total_price = total_sum
+                order_item_obj = OrderItem.objects.create(
+                    dish=dish,
+                    order=order,
+                    quantity=quantity
+                )
+
+                for additive in additives:
+                    order_item_obj.additives.add(additive)
+
+                order_item_obj.save()
+
+                total_sum += dish.price * quantity
+
+            order.total_price = total_sum
+
+        except serializers.ValidationError:
+            order.delete()
+            print('NOTHING HAPPENS')
+            raise
+
         order.save()
 
         return order

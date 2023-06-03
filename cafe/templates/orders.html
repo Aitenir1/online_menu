@@ -17,7 +17,10 @@
 
     <div class="container">
         <div class="header">
-            <img src="{% static 'img/logo.svg' %}" alt="">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/logo.svg' %}" alt="">
+            </a>
+
             <div class="header-img">
                 <a href="{% url 'order-search' %}">
                     <img src="{% static 'img/menu.svg' %}" alt="">
@@ -38,31 +41,51 @@
                 {% csrf_token %}
                 <input type="date" name="date">
                 <input type="submit" value="Save">
+{#                <input type="submit" value="active">#}
             </form>
+                {% if date != None %}
+                    <h4>
+                        Список заказов за {{ date|date:"d/m/Y" }}
+                    </h4>
+                {% endif %}
+
             </div>
             {% for order in orders %}
-            <h1>{{ order.table }} {% if order.status %}(Закрыт){% endif %}</h1>
-            <i>{{ order.time_created|date:'H:i' }}</i>
-            <table>
-                <tr>
-                    <th>Название</th>
-                    <th>Цена</th>
-                    <th>Количество</th>
-                    <th>Итого</th>
-                </tr>
+                <h1>{{ order.table }} {% if order.status %}(Закрыт){% endif %}</h1>
+                <i>{{ order.time_created|date:'H:i' }}</i>
+                <table>
+                    <tr>
+                        <th>Название</th>
+                        <th>Цена</th>
+                        <th>Количество</th>
+                        <th>Итого</th>
+                    </tr>
+
+                    {% for order_item in order.items.all %}
+
+                    <tr>
+                        <td>{{ order_item.dish.name_ru }}</td>
+                        <td>{{ order_item.dish.price }}</td>
+                        <td>{{ order_item.quantity }}</td>
+                        <td>
+                            {% widthratio order_item.dish.price 1 order_item.quantity %}
+                        </td>
+
+                    </tr>
+                {% endfor %}
 
                 {% for order_item in order.items.all %}
 
-                <tr>
-                    <td>{{ order_item.dish.name_ru }}</td>
-                    <td>{{ order_item.dish.price }}</td>
-                    <td>{{ order_item.quantity }}</td>
-                    <td>
-                        {% widthratio order_item.dish.price 1 order_item.quantity %}
-                    </td>
-                </tr>
-
+                    {% for additive in order_item.additives.all %}
+                        <tr>
+                            <td>{{additive.name_ru }}</td>
+                            <td>{{ additive.price }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
+
 
                 <tr>
                     <td><b>
