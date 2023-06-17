@@ -1,6 +1,6 @@
 from fpdf import FPDF
 
-from MotionWeb.settings import FONT_PATH
+from MotionWeb.settings.base import FONT_PATH
 
 
 class Cheque(FPDF):

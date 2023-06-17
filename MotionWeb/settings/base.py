@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG') == 'True'
@@ -16,7 +16,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'cafe',
-    
+
     'rest_framework',
     'corsheaders',
     'django.contrib.admin',
@@ -69,15 +69,6 @@ WSGI_APPLICATION = 'MotionWeb.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cafe',
-        'HOST': 'localhost',
-        'PORT': '5432'
-    }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

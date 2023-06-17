@@ -3,7 +3,7 @@ import uuid
 
 from cafe.Cheque import Cheque
 
-from MotionWeb.settings import FONT_PATH
+from MotionWeb.settings.base import FONT_PATH
 
 class Table(models.Model):
     id = models.AutoField(primary_key=True)
