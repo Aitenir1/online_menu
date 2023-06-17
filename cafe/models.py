@@ -1,10 +1,9 @@
 from django.db import models
-from django.db.models import F, Q
 import uuid
 
 from cafe.Cheque import Cheque
 
-from django.utils import timezone
+from MotionWeb.settings import FONT_PATH
 
 class Table(models.Model):
     id = models.AutoField(primary_key=True)
@@ -84,7 +83,7 @@ class Order(models.Model):
             format=(80, 100)
         )
 
-        cheque_pdf.add_font('DejaVu', '', 'fonts/DejaVuSansCondensed.ttf', uni=True)
+        cheque_pdf.add_font('DejaVu', '', FONT_PATH, uni=True)
         cheque_pdf.set_font("DejaVu", '', 8)
 
         cheque_pdf.set_auto_page_break(auto=True, margin=5)

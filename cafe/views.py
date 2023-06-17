@@ -8,7 +8,7 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 
 from cafe.models import Dish, Order
-from cafe.serializers import DishSerializer, OrderSerializer
+from cafe.serializers import DishSerializer, OrderSerializer, OrderGetSerializer
 
 
 class DishViewSet(viewsets.ReadOnlyModelViewSet):
@@ -30,7 +30,7 @@ class MyLoginView(LoginView):
 
 class OrderListApiView(generics.ListAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    serializer_class = OrderGetSerializer
     permission_classes = (IsAuthenticated,)
 
 

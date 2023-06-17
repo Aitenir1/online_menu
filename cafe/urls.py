@@ -20,7 +20,7 @@ router.register(r'dishes', DishViewSet, basename='dish')
 urlpatterns = [
     path('api/', include(router.urls)),
     path('api/orders', OrderCreateApi.as_view()),
-    path('api/orders-get', OrderListApiView.as_view(), name='order-create'),
+    path('api/orders-get/', OrderListApiView.as_view(), name='order-create'),
     path('api-token-auth/', obtain_auth_token, name='get-token'),
     path('login/', MyLoginView.as_view(), name='login'),
     path('home/', login_required(OrderListView.as_view()), name='home'),

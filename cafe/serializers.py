@@ -83,9 +83,26 @@ class OrderSerializer(serializers.ModelSerializer):
 
         except serializers.ValidationError:
             order.delete()
-            print('NOTHING HAPPENS')
             raise
 
         order.save()
 
         return order
+
+
+class OrderItemGetSerializer(serializers.ModelSerializer):
+    dish = DishSerializer()
+    additives = AdditiveSerializer(many=True)
+
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
+
+
+class OrderGetSerializer(serializers.ModelSerializer):
+    items = OrderItemGetSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+

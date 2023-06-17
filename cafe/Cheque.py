@@ -1,5 +1,7 @@
 from fpdf import FPDF
 
+from MotionWeb.settings import FONT_PATH
+
 
 class Cheque(FPDF):
     def __init__(self, date, table, *args, **kwargs):
@@ -8,7 +10,8 @@ class Cheque(FPDF):
         self.table = table
 
     def header(self):
-        self.add_font('DejaVu', '', 'fonts/DejaVuSansCondensed.ttf', uni=True)
+        print(f"{FONT_PATH=}")
+        self.add_font('DejaVu', '', FONT_PATH, uni=True)
         self.set_font("DejaVu", '', 8)
 
         self.cell(0, 5, "Кофейня \"Мой мир\"", 0, 1, "C")
