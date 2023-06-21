@@ -20,9 +20,9 @@ class Dish(models.Model):
     description_kg = models.TextField(default='Тамак')
     description_ru = models.TextField(default='Еда')
     price = models.FloatField()
-    gram = models.IntegerField(default=200)
+    gram = models.CharField(max_length=100, default='200')
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
-    image = models.ImageField(default='food1.png')
+    image = models.ImageField(default='food1.png', upload_to='dishes/')
 
     def __str__(self):
         return f"{self.name_en} | {self.price}"

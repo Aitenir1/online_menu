@@ -1,0 +1,384 @@
+openapi: 3.0.3
+info:
+  title: Online Menu
+  version: 0.0.0
+paths:
+  /api-token-auth/:
+    post:
+      operationId: api_token_auth_create
+      tags:
+      - api-token-auth
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+          description: ''
+  /api/dishes/:
+    get:
+      operationId: api_dishes_list
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dish'
+          description: ''
+  /api/dishes/{id}/:
+    get:
+      operationId: api_dishes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this dish.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+  /api/orders:
+    post:
+      operationId: api_orders_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/orders-get/:
+    get:
+      operationId: api_orders_get_list
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderGet'
+          description: ''
+  /dishes/:
+    get:
+      operationId: dishes_list
+      tags:
+      - dishes
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dish'
+          description: ''
+  /dishes/{id}/:
+    get:
+      operationId: dishes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this dish.
+        required: true
+      tags:
+      - dishes
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+          description: ''
+components:
+  schemas:
+    Additive:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name_en:
+          type: string
+          maxLength: 50
+        name_ru:
+          type: string
+          maxLength: 50
+        name_kg:
+          type: string
+          maxLength: 50
+        price:
+          type: number
+          format: double
+        dish:
+          type: string
+          format: uuid
+      required:
+      - dish
+      - id
+      - name_en
+      - name_kg
+      - name_ru
+    AuthToken:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        token:
+          type: string
+          readOnly: true
+      required:
+      - password
+      - token
+      - username
+    Dish:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name_en:
+          type: string
+          maxLength: 200
+        name_kg:
+          type: string
+          maxLength: 200
+        name_ru:
+          type: string
+          maxLength: 200
+        description_en:
+          type: string
+        description_kg:
+          type: string
+        description_ru:
+          type: string
+        price:
+          type: number
+          format: double
+        gram:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        category_name:
+          type: string
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        available_additives:
+          type: array
+          items:
+            $ref: '#/components/schemas/Additive'
+      required:
+      - available_additives
+      - category_name
+      - description_en
+      - id
+      - name_en
+      - price
+    IsTakeawayEnum:
+      enum:
+      - 0
+      - 1
+      type: integer
+      description: |-
+        * `0` - In progress
+        * `1` - Completed
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        table:
+          type: integer
+        time_created:
+          type: string
+          format: date-time
+        status:
+          allOf:
+          - $ref: '#/components/schemas/IsTakeawayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        payment:
+          allOf:
+          - $ref: '#/components/schemas/IsTakeawayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        is_takeaway:
+          allOf:
+          - $ref: '#/components/schemas/IsTakeawayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        total_price:
+          type: integer
+          readOnly: true
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+      required:
+      - id
+      - items
+      - table
+      - total_price
+    OrderGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemGet'
+        time_created:
+          type: string
+          format: date-time
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/IsTakeawayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        is_takeaway:
+          allOf:
+          - $ref: '#/components/schemas/IsTakeawayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        payment:
+          allOf:
+          - $ref: '#/components/schemas/IsTakeawayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        total_price:
+          type: integer
+          readOnly: true
+          nullable: true
+        table:
+          type: integer
+      required:
+      - id
+      - items
+      - table
+      - time_created
+      - total_price
+    OrderItem:
+      type: object
+      properties:
+        dish:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        additives:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - dish
+    OrderItemGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        dish:
+          $ref: '#/components/schemas/Dish'
+        additives:
+          type: array
+          items:
+            $ref: '#/components/schemas/Additive'
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        order:
+          type: string
+          format: uuid
+      required:
+      - additives
+      - dish
+      - id
+      - order
+  securitySchemes:
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

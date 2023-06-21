@@ -4,8 +4,9 @@ from django.views.generic import ListView
 from django.shortcuts import render, redirect, HttpResponse
 from django.utils.dateparse import parse_date
 
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, views
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from cafe.models import Dish, Order
 from cafe.serializers import DishSerializer, OrderSerializer, OrderGetSerializer
@@ -33,6 +34,11 @@ class OrderListApiView(generics.ListAPIView):
     serializer_class = OrderGetSerializer
     permission_classes = (IsAuthenticated,)
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        return queryset.filter(status=0)
+
 
 class OrderListView(ListView):
     model = Order
@@ -58,6 +64,25 @@ class OrderListView(ListView):
             context['date'] = queryset.first().time_created
 
         return context
+
+
+class OrderStatusApiView(views.APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def put(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk)
+
+            if order.status:
+                return Response({'message': 'The order is already completed'})
+        except Exception as e:
+            print(e)
+            return Response('We didn\'t find the order')
+
+        order.status = 1
+        order.save()
+
+        return Response({'message': 'The order has been completed successfully'})
 
 
 def complete_order(request, pk):
