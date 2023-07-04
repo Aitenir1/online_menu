@@ -63,7 +63,6 @@ class Command(BaseCommand):
                     name=category
                 )
 
-
                 dish, created = Dish.objects.get_or_create(
                     name_en=name,
                     name_ru=name,
@@ -75,13 +74,13 @@ class Command(BaseCommand):
                     gram=gram,
                     category=category,
                 )
-                print(img_path)
+
                 dish.image.save(
                     img_path,
                     io.BytesIO(response.content),
                     save=True
                 )
+
                 dish.save()
-        print(response_status_codes)
         self.stdout.write(self.style.SUCCESS('Data imported successfully'))
 

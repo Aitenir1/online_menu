@@ -5,6 +5,8 @@ from cafe.Cheque import Cheque
 
 from MotionWeb.settings.base import FONT_PATH
 
+from sh import lp
+
 class Table(models.Model):
     id = models.AutoField(primary_key=True)
 
@@ -80,29 +82,41 @@ class Order(models.Model):
         cheque_pdf = Cheque(
             date=self.time_created.strftime("%d.%m.%y %H:%M:%S"),
             table=self.table,
-            format=(80, 100)
+            format=(50, 55 + 4 * len(self.items.all()))
         )
 
-        cheque_pdf.add_font('DejaVu', '', FONT_PATH, uni=True)
-        cheque_pdf.set_font("DejaVu", '', 8)
-
-        cheque_pdf.set_auto_page_break(auto=True, margin=5)
         cheque_pdf.add_page()
+        # cheque.set_margins(1, 2, 2)
+        # cheque.set_title("CHEQUE")
+        # cheque.set_font("DejaVu", '', 7)
+        cheque_pdf.set_font('DejaVu', style='', size=8)
+        cheque_pdf.cell(0, 0.5, "---------------------------------------" * 2, 0, 1)
+        cheque_pdf.cell(25, 4, "Блюда", 0, 0)
+        cheque_pdf.cell(16, 4, "Кол.", 0, 0)
+        cheque_pdf.cell(15, 4, "Сумма", 0, 1, 'C')
 
-        cheque_pdf.cell(0, 5, 'Наименования товаров:', 0, 1)
+        cheque_pdf.set_font('DejaVu', style='', size=7)
 
         for order_item in self.items.all():
-            cheque_pdf.cell(40, 4, order_item.dish.name_ru, 0, 0)
-            cheque_pdf.cell(10, 4, f"{order_item.quantity}*{order_item.dish.price}", 0, 0)
-            cheque_pdf.cell(10, 4, f"={order_item.quantity*order_item.dish.price}", 0, 1)
+            dish_name = order_item.dish.name_ru
+
+            if len(dish_name) > 18:
+                dish_name = dish_name[:17] + '.'
+
+            cheque_pdf.cell(25, 4, dish_name, 0, 0)
+            cheque_pdf.cell(12, 4, f"{order_item.quantity}*{order_item.dish.price}", 0, 0)
+            cheque_pdf.cell(11, 4, f"={order_item.quantity*order_item.dish.price}", 0, 1)
+
             for additive in order_item.additives.all():
                 cheque_pdf.cell(50, 4, additive.name_ru, 0, 0)
                 cheque_pdf.cell(10, 4, f"={additive.price}", 0, 1)
-
-        cheque_pdf.cell(0, 5, "", 0, 1)
-        cheque_pdf.cell(0, 4, f"Наличными", 0, 1, "")
+        cheque_pdf.cell(0, 0.5, "---------------------------------------" * 2, 0, 1)
         cheque_pdf.set_font("DejaVu", '', 10)
-        cheque_pdf.cell(0, 4, f"Общая сумма: {self.total_price}", 0, 1, "")
+        print("IS SIOM")
+        cheque_pdf.cell(0, 6, f"Общая сумма: {self.total_price}", 0, 1, "")
+        cheque_pdf.output('cheque.pdf', 'F')
+
+        lp('cheque.pdf')
 
         return cheque_pdf
 

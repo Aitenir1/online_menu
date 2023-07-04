@@ -104,3 +104,4 @@ def get_cheque(request, pk):
     response.write(cheque.output(dest="S").encode('latin-1'))
 
     return response
+

@@ -80,6 +80,8 @@ class OrderSerializer(serializers.ModelSerializer):
                 total_sum += dish.price * quantity
 
             order.total_price = total_sum
+            print("are you going to do someting?")
+            order.generate_cheque()
 
         except serializers.ValidationError:
             order.delete()
